@@ -10,9 +10,9 @@ const controls = [
 const BuildControl = props => {
     return (
         <div className="d-flex">
-            <div className="mr-auto ml-5" style={{ fontWeight: "bold", fontSize: "1.2rem" }}>{props.label}</div>
+            <div className="mr-auto ml-5" style={{ fontWeight: "bold", fontSize: "1.2rem", marginRight: "50%", width: "100px"}}>{props.label}</div>
             <button className="btn btn-danger btn-sm m-1" onClick={props.removed}>Less</button>
-            <button className="btn btn-success btn-sm m-1" onClick={props.added}>More</button>
+            <button className="btn btn-success btn-sm m-1" style={{}} onClick={props.added}>More</button>
         </div>
     )
 }
