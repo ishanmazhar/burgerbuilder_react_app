@@ -1,12 +1,22 @@
 import React, { Component } from 'react';
 import { Formik } from 'formik';
+import { Alert } from 'reactstrap';
 
 import { connect } from 'react-redux'; 
 import { auth } from '../../redux/authActionCreators';
 
+import Spinner from '../Spinner/Spinner'; 
+
 const mapDispatchToProps = dispatch => {
     return {
         auth: (email, password, mode) => dispatch(auth(email, password, mode))
+    }
+}
+
+const mapStateToProps = state => {
+    return {
+        authLoading: state.authLoading,
+        authFailedMsg: state.authFailedMsg, 
     }
 }
 
@@ -18,52 +28,60 @@ class Auth extends Component {
     switchModeHandler = () => {
         this.setState({ mode: this.state.mode === "Sign Up" ? "Login" : "Sign Up"})
     }
+
     render() {
-        return (
-            <div>
+        let err = null;
+        if (this.props.authFailedMsg !== null) {
+            err = <Alert color="danger">{this.props.authFailedMsg}</Alert>
+        }
+        let form = null;
+        if (this.props.authLoading) {
+            form = <Spinner />
+        } else {
+            form = (
                 <Formik 
-                    initialValues={
-                        {
-                            email: "",
-                            password: "",
-                            passwordConfirm: "",
+                initialValues={
+                    {
+                        email: "",
+                        password: "",
+                        passwordConfirm: "",
+                    }
+                }
+                onSubmit={
+                    (values) => {
+                        console.log("Values: ", values);
+                        this.props.auth(values.email, values.password, this.state.mode);
+                    }
+                }
+                validate={(values) => {
+                    const errors = {};
+
+                    if(!values.email) {
+                        errors.email = 'Required';
+                    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+                        errors.email = 'Invalid Email Address';
+                    }
+
+                    if(!values.password) {
+                        errors.password = 'Required';
+                    } else if (values.password.length < 4) {
+                        errors.password = 'Must be at least 4 characters';
+                    }
+
+                    if(this.state.mode === "Sign Up") {
+                        if (!values.passwordConfirm) {
+                            errors.passwordConfirm = 'Required';
+                        } else if (values.password !== values.passwordConfirm) {
+                            errors.passwordConfirm = 'Password field not matched'; 
                         }
                     }
-                    onSubmit={
-                        (values) => {
-                            console.log("Values: ", values);
-                            this.props.auth(values.email, values.password, this.state.mode);
-                        }
-                    }
-                    validate={(values) => {
-                        const errors = {};
 
-                        if(!values.email) {
-                            errors.email = 'Required';
-                        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-                            errors.email = 'Invalid Email Address';
-                        }
+                    // console.log ("Errors: ", errors)
+                    return errors; 
+                }}
 
-                        if(!values.password) {
-                            errors.password = 'Required';
-                        } else if (values.password.length < 4) {
-                            errors.password = 'Must be at least 4 characters';
-                        }
-
-                        if(this.state.mode === "Sign Up") {
-                            if (!values.passwordConfirm) {
-                                errors.passwordConfirm = 'Required';
-                            } else if (values.password !== values.passwordConfirm) {
-                                errors.passwordConfirm = 'Password field not matched'; 
-                            }
-                        }
-
-                        // console.log ("Errors: ", errors)
-                        return errors; 
-                    }}
-
-                >
-                    {({ values, handleChange, handleSubmit, errors })=> (
+            >
+                {({ values, handleChange, handleSubmit, errors })=> (
                     <div style={{
                         border: "1px grey solid",
                         padding: "15px",
@@ -111,11 +129,16 @@ class Auth extends Component {
                             <button type="submit" className="btn btn-success">{this.state.mode === "Sign Up" ? "Sign Up" : "Login"}</button>
                         </form>
                     </div>)}
-
                 </Formik>
+            )
+        }
+        return (
+            <div>
+                {err} 
+                {form} 
             </div>
         )
     }
 }
 
-export default connect(null, mapDispatchToProps)(Auth); 
+export default connect(mapStateToProps, mapDispatchToProps)(Auth); 
