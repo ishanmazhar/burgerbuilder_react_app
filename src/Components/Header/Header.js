@@ -19,7 +19,7 @@ const Header = () => {
                 <NavbarBrand href="/" className="mr-auto ml-md-5 Brand">
                     <img src={Logo} alt="logo" width="80px" /> 
                 </NavbarBrand>
-                <Nav className="mr-md-5">
+                <Nav className="mr-md-5" style={{marginRight: "10px"}}>
                     <NavItem>
                         <NavLink exact to="/" className="NavLink">Burger Builder</NavLink>
                     </NavItem>
