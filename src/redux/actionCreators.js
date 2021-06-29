@@ -40,13 +40,28 @@ export const orderLoadFailed = () => {
     }
 }
 
-export const fetchOrders = (token, userId) => dispatch => { 
-    const queryParams = '&orderBy="userId"&equalTo="' + userId + '"';
-    axios.get('https://burger-builder-ff8fa-default-rtdb.firebaseio.com/orders.json?auth=' + token + queryParams)
+// FIREBASE REST API
+
+// export const fetchOrders = (token, userId) => dispatch => { 
+//     const queryParams = '&orderBy="userId"&equalTo="' + userId + '"';
+//     axios.get('https://burger-builder-ff8fa-default-rtdb.firebaseio.com/orders.json?auth=' + token + queryParams)
+//         .then(response => {
+//             dispatch(loadOrders(response.data)); 
+//         })
+//         .catch(err => {
+//             dispatch(orderLoadFailed()); 
+//         })
+// }
+
+// BURGER-BUILDER API
+
+export const fetchOrders = (token, userId) => dispatch => {
+    let url = process.env.REACT_APP_BACKEND_URL;
+    axios.get(`${url}/order`, { headers: { "Authorization": `Bearer ${token}` } })
         .then(response => {
-            dispatch(loadOrders(response.data)); 
+            dispatch(loadOrders(response.data));
         })
         .catch(err => {
-            dispatch(orderLoadFailed()); 
+            dispatch(orderLoadFailed());
         })
 }

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Component } from 'react';
-import { Button, Modal, ModalBody } from 'reactstrap'; 
-import Spinner from '../../Spinner/Spinner'; 
+import { Button, Modal, ModalBody } from 'reactstrap';
+import Spinner from '../../Spinner/Spinner';
 
-import axios from 'axios'; 
+import axios from 'axios';
 
 import { connect } from 'react-redux';
 import { resetIngredients } from '../../../redux/actionCreators';
@@ -13,7 +13,7 @@ const mapStateToProps = state => {
         ingredients: state.ingredients,
         totalPrice: state.totalPrice,
         purchasable: state.purchasable,
-        userId: state.userId, 
+        userId: state.userId,
         token: state.token,
 
     }
@@ -21,7 +21,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        resetIngredients: () => dispatch(resetIngredients()), 
+        resetIngredients: () => dispatch(resetIngredients()),
     }
 }
 
@@ -33,7 +33,7 @@ class Checkout extends Component {
             paymentType: "Cash on Delivery",
         },
         isLoading: false,
-        isModalOpen: false, 
+        isModalOpen: false,
         modalMsg: "",
     }
 
@@ -45,81 +45,112 @@ class Checkout extends Component {
         this.setState({
             values: {
                 ...this.state.values,
-                [e.target.name]: e.target.value, 
+                [e.target.name]: e.target.value,
             }
         })
     }
 
     submitHandler = () => {
-        this.setState({isLoading: true}); 
+        this.setState({ isLoading: true });
         const order = {
             ingredients: this.props.ingredients,
             customer: this.state.values,
             price: this.props.totalPrice,
-            orderTime: new Date(), 
-            userId: this.props.userId, 
+            orderTime: new Date(),
+            userId: this.props.userId,
         }
-        axios.post("https://burger-builder-ff8fa-default-rtdb.firebaseio.com/orders.json?auth=" + this.props.token, order)
-        .then(response => {
-            if(response.status === 200) {
-                this.setState({
-                    isLoading: false,
-                    isModalOpen: true,
-                    modalMsg: "Order Placed Successfully!",
-                })
-                this.props.resetIngredients(); 
-            } else {
-                this.setState({
-                    isLoading: false,
-                    isModalOpen: true,
-                    modalMsg: "Something Went Wrong! Please Order Again",
-                })
+        // FIREBASE REST API
+
+        // axios.post("https://burger-builder-ff8fa-default-rtdb.firebaseio.com/orders.json?auth=" + this.props.token, order)
+        // .then(response => {
+        //     if(response.status === 200) {
+        //         this.setState({
+        //             isLoading: false,
+        //             isModalOpen: true,
+        //             modalMsg: "Order Placed Successfully!",
+        //         })
+        //         this.props.resetIngredients(); 
+        //     } else {
+        //         this.setState({
+        //             isLoading: false,
+        //             isModalOpen: true,
+        //             modalMsg: "Something Went Wrong! Please Order Again",
+        //         })
+        //     }
+        // })
+
+        // BURGER-BUILDER API
+
+        let url = process.env.REACT_APP_BACKEND_URL;
+        axios.post(
+            `${url}/order`,
+            order,
+            {
+                headers: {
+                    "Authorization": `Bearer ${this.props.token}`
+                }
             }
-        })
-        .catch(err => {
-            this.setState({
-                isLoading: false,
-                isModalOpen: true,
-                modalMsg: "Something Went Wrong! Please Order Again!",
+        )
+            .then(response => {
+                if (response.status === 201) {
+                    this.setState({
+                        isLoading: false,
+                        isModalOpen: true,
+                        modalMsg: "Order Placed Successfully!",
+                    })
+                    this.props.resetIngredients();
+                } else {
+                    this.setState({
+                        isLoading: false,
+                        isModalOpen: true,
+                        modalMsg: "Something Went Wrong! Please Order Again",
+                    })
+                }
             })
-        })
-        console.log(order); 
+            .catch(err => {
+                this.setState({
+                    isLoading: false,
+                    isModalOpen: true,
+                    modalMsg: "Something Went Wrong! Please Order Again!",
+                })
+            })
+        console.log(order);
     }
     render() {
         let form = (<div>
             <h4 style={{
-                    border: "1px solid grey",
-                    boxShadow: "1px 1px #888888",
-                    borderRadius: "5px",
-                    padding: "20px"
-                }}>Payment: {this.props.totalPrice} BDT </h4>
+                border: "1px solid grey",
+                boxShadow: "1px 1px #888888",
+                borderRadius: "5px",
+                padding: "20px"
+            }}>Payment: {this.props.totalPrice} BDT </h4>
 
-                <form style={{
-                    border: "1px solid grey",
-                    boxShadow: "1px 1px #888888",
-                    borderRadius: "5px",
-                    padding: "20px"
-                }}>
-                    <textarea name="deliveryAddress" value={this.state.values.deliveryAddress}
+            <form style={{
+                border: "1px solid grey",
+                boxShadow: "1px 1px #888888",
+                borderRadius: "5px",
+                padding: "20px"
+            }}>
+                <textarea name="deliveryAddress" value={this.state.values.deliveryAddress}
                     className="form-control" placeholder="Your Address"
                     onChange={(e) => this.inputChangeHandler(e)}></textarea>
-                    <br />
-                    <input name="phone" className="form-control" value={this.state.values.phone} 
+                <br />
+                <input name="phone" className="form-control" value={this.state.values.phone}
                     placeholder="Your Phone Number"
                     onChange={(e) => this.inputChangeHandler(e)} />
-                    <br />
-                    <select name="paymentType" className="form-control" 
+                <br />
+                <select name="paymentType" className="form-control"
                     value={this.state.values.paymentType}
                     onChange={(e) => this.inputChangeHandler(e)}>
-                        <option value="Cash on Delivery">Cash on delivery</option>
-                        <option value="Bkash">Bkash</option>
-                    </select>
-                    <br />
-                    <Button style={{backgroundColor:"#D70F64"}}
+                    <option value="Cash on Delivery">Cash on delivery</option>
+                    <option value="Bkash">Bkash</option>
+                </select>
+                <br />
+                <Button style={{ backgroundColor: "#D70F64" }}
                     className="mr-auto" onClick={this.submitHandler}
                     disabled={!this.props.purchasable}>Place Order</Button>
-                    <Button color="secondary" className="m-1" onClick={this.goBack}>Cancel</Button>
-                </form>
+                <Button color="secondary" className="m-1" onClick={this.goBack}>Cancel</Button>
+            </form>
         </div>
         )
         return (
@@ -127,7 +158,7 @@ class Checkout extends Component {
                 {this.state.isLoading ? <Spinner /> : form}
                 <Modal isOpen={this.state.isModalOpen} onClick={this.goBack}>
                     <ModalBody>
-                        <p>{this.state.modalMsg}</p> 
+                        <p>{this.state.modalMsg}</p>
                     </ModalBody>
                 </Modal>
             </div>
@@ -135,4 +166,4 @@ class Checkout extends Component {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Checkout); 
+export default connect(mapStateToProps, mapDispatchToProps)(Checkout);

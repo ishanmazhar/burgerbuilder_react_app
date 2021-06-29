@@ -9,9 +9,9 @@ const Order = props => {
                 padding: "5px",
                 marginRight: "10px", 
             }} key={item.type}>{item.amount} x 
-            <span style={{textTransform: "capitalize"}}> {item.type}</span></span>
+            <span style={{textTransform: "capitalize"}}> {item.type} </span></span>
         )
-    })
+    });
     return (
         <div style= {{
             border: "1px solid grey",
@@ -20,7 +20,8 @@ const Order = props => {
             padding: "20px",
             marginBottom: "10px", 
         }}>
-            <p>Order Number: {props.order.id}</p>
+            {/* <p>Order Number: {props.order.id}</p> */}    {/* FOR FIREBASE */}
+            <p>Order Number: {props.order._id}</p>  {/* FOR BURGER-BUILDER API */}
             <p>Delivery Address: {props.order.customer.deliveryAddress}</p>
             <hr />
             {ingredientSummary} 
